@@ -63,6 +63,7 @@ function calculate() {
         <h2>Calculadora de Notas</h2>
 
         <div>
+            <p>Nota 1</p>
             <input v-model.number="note1" type="number" placeholder="Nota 1" @blur="touched.note1 = true" />
             <p v-if="(formSubmitted || touched.note1) && !errors.note1.valid" class="error">
                 {{ errors.note1.message }}
@@ -70,6 +71,7 @@ function calculate() {
         </div>
 
         <div>
+            <p>Nota 2</p>
             <input v-model.number="note2" type="number" placeholder="Nota 2" @blur="touched.note2 = true" />
             <p v-if="(formSubmitted || touched.note2) && !errors.note2.valid" class="error">
                 {{ errors.note2.message }}
@@ -77,6 +79,7 @@ function calculate() {
         </div>
 
         <div>
+            <p>Nota 3</p>
             <input v-model.number="note3" type="number" placeholder="Nota 3" @blur="touched.note3 = true" />
             <p v-if="(formSubmitted || touched.note3) && !errors.note3.valid" class="error">
                 {{ errors.note3.message }}
@@ -84,6 +87,7 @@ function calculate() {
         </div>
 
         <div>
+            <p>Asistencia %</p>
             <input v-model.number="asist" type="number" placeholder="Asistencia %" @blur="touched.asist = true" />
             <p v-if="(formSubmitted || touched.asist) && !errors.asist.valid" class="error">
                 {{ errors.asist.message }}
