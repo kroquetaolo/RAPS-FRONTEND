@@ -1,10 +1,19 @@
+HTML
+
 <script setup>
 import { ref } from "vue";
 
-const name = ref(null);
-const email = ref(null);
-const password = ref(null);
-const confirmPassword = ref(null);
+const name = ref("");
+const email = ref("");
+const password = ref("");
+const confirmPassword = ref("");
+
+const touched = ref({
+    name: false,
+    email: false,
+    password: false,
+    confirmPassword: false
+});
 
 const errors = ref({
     name: "",
@@ -13,87 +22,112 @@ const errors = ref({
     confirmPassword: ""
 });
 
-function validate() {
-    errors.value = {
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: ""
-    };
+function validateName() {
+    if (!touched.value.name) return;
+    errors.value.name = !name.value ? "El nombre es requerido" : "";
+}
 
-    let valid = true;
-
-    if (!name.value) {
-        errors.value.name = "El nombre es requerido";
-        valid = false;
-    }
-
+function validateEmail() {
+    if (!touched.value.email) return;
     if (!email.value) {
         errors.value.email = "El correo es requerido";
-        valid = false;
-    }
-
-    if (!isValidEmail(email.value)) {
+    } else if (!isValidEmail(email.value)) {
         errors.value.email = "Correo inválido";
-        valid = false;
+    } else {
+        errors.value.email = "";
     }
+}
 
-    if (!password.value) {
-        errors.value.password = "La contraseña es requerida";
-        valid = false;
-    }
+function validatePassword() {
+    if (!touched.value.password) return;
+    errors.value.password = !password.value ? "La contraseña es requerida" : "";
+    if (touched.value.confirmPassword) validateConfirmPassword();
+}
 
+function validateConfirmPassword() {
+    if (!touched.value.confirmPassword) return;
     if (!confirmPassword.value) {
         errors.value.confirmPassword = "Confirma tu contraseña";
-        valid = false;
+    } else if (password.value !== confirmPassword.value) {
+        errors.value.confirmPassword = "La contraseña debe coincidir";
+    } else {
+        errors.value.confirmPassword = "";
     }
-    if (password.value !== confirmPassword.value) {
-        errors.value.confirmPassword = "La constraseña debe coincidir";
-        valid = false;
-    }
-
-    if (!valid) return;
-
-    alert("El registro se ha realizado correctamente")
 }
 
-function isValidEmail() {
+function validate() {
+    Object.keys(touched.value).forEach(key => touched.value[key] = true);
+
+    validateName();
+    validateEmail();
+    validatePassword();
+    validateConfirmPassword();
+
+    // Verificamos si hay algún error activo
+    const hasErrors = Object.values(errors.value).some(error => error !== "");
+
+    if (hasErrors) return;
+
+    alert("El registro se ha realizado correctamente");
+}
+
+function isValidEmail(val) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email.value)
+    return emailRegex.test(val);
 }
 </script>
-
 
 <template>
     <form class="card" @submit.prevent="validate">
         <h2>Registro</h2>
         <div>
             <p>Nombre</p>
-            <input v-model="name" type="text" placeholder="Nombre" />
+            <input 
+                v-model="name" 
+                type="text" 
+                placeholder="Nombre" 
+                @blur="touched.name = true; validateName()"
+                @input="validateName()"
+            />
             <p class="error" v-if="errors.name">{{ errors.name }}</p>
         </div>
         <div>
-            <p>Correo Electronico</p>
-            <input v-model="email" type="email" placeholder="Correo" />
+            <p>Correo Electrónico</p>
+            <input 
+                v-model="email" 
+                type="email" 
+                placeholder="Correo" 
+                @blur="touched.email = true; validateEmail()"
+                @input="validateEmail()"
+            />
             <p class="error" v-if="errors.email">{{ errors.email }}</p>
         </div>
         <div>
             <p>Contraseña</p>
-            <input v-model="password" type="password" placeholder="Contraseña" />
+            <input 
+                v-model="password" 
+                type="password" 
+                placeholder="Contraseña" 
+                @blur="touched.password = true; validatePassword()"
+                @input="validatePassword()"
+            />
             <p class="error" v-if="errors.password">{{ errors.password }}</p>
         </div>
         <div>
             <p>Confirmar Contraseña</p>
-            <input v-model="confirmPassword" type="password" placeholder="Confirmar contraseña" />
+            <input 
+                v-model="confirmPassword" 
+                type="password" 
+                placeholder="Confirmar contraseña" 
+                @blur="touched.confirmPassword = true; validateConfirmPassword()"
+                @input="validateConfirmPassword()"
+            />
             <p class="error" v-if="errors.confirmPassword">{{ errors.confirmPassword }}</p>
         </div>
 
-        <button type="submit">
-            Registrar
-        </button>
+        <button type="submit">Registrar</button>
     </form>
 </template>
-
 <style scoped>
 .card {
     display: flex;

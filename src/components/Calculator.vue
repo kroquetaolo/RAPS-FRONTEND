@@ -11,36 +11,49 @@ const averageResult = ref("");
 const status = ref("");
 const showResult = ref(false);
 const resultValidation = ref("");
+const formSubmitted = ref(false);
+
+const touched = ref({
+    note1: false,
+    note2: false,
+    note3: false,
+    asist: false
+});
+
+const errors = computed(() => {
+    return {
+        note1: noteValidator(note1.value),
+        note2: noteValidator(note2.value),
+        note3: noteValidator(note3.value),
+        asist: asistValidator(asist.value)
+    };
+});
 
 const isFormValid = computed(() => {
     return (
-        noteValidator(note1.value).valid &&
-        noteValidator(note2.value).valid &&
-        noteValidator(note3.value).valid &&
-        asistValidator(asist.value)
+        errors.value.note1.valid &&
+        errors.value.note2.valid &&
+        errors.value.note3.valid &&
+        errors.value.asist.valid
     );
 });
 
 function calculate() {
+    formSubmitted.value = true;
     resultValidation.value = "";
     showResult.value = false;
 
     if (!isFormValid.value) {
         resultValidation.value = "Debe completar todos los campos correctamente.";
+        averageResult.value = "";
+        status.value = "";
         return;
     }
 
-    const average =
-        note1.value * 0.35 +
-        note2.value * 0.35 +
-        note3.value * 0.3;
+    const average = note1.value * 0.35 + note2.value * 0.35 + note3.value * 0.3;
+    averageResult.value = average.toFixed(1);
 
-    averageResult.value = average;
-
-    status.value = average >= 40 && asist.value >= 80
-        ? "Aprobado"
-        : "Reprobado";
-
+    status.value = average >= 40 && asist.value >= 80 ? "Aprobado" : "Reprobado";
     showResult.value = true;
 }
 </script>
@@ -50,36 +63,34 @@ function calculate() {
         <h2>Calculadora de Notas</h2>
 
         <div>
-            <input v-model.number="note1" type="number" min="10" max="70" placeholder="Nota 1" />
-            <p v-if="!noteValidator(note1).valid" class="error">
-                {{ noteValidator(note1).message }}
+            <input v-model.number="note1" type="number" placeholder="Nota 1" @blur="touched.note1 = true" />
+            <p v-if="(formSubmitted || touched.note1) && !errors.note1.valid" class="error">
+                {{ errors.note1.message }}
             </p>
         </div>
 
         <div>
-            <input v-model.number="note2" type="number" min="10" max="70" placeholder="Nota 2" />
-            <p v-if="!noteValidator(note2).valid" class="error">
-                {{ noteValidator(note2).message }}
+            <input v-model.number="note2" type="number" placeholder="Nota 2" @blur="touched.note2 = true" />
+            <p v-if="(formSubmitted || touched.note2) && !errors.note2.valid" class="error">
+                {{ errors.note2.message }}
             </p>
         </div>
 
         <div>
-            <input v-model.number="note3" type="number" min="10" max="70" placeholder="Nota 3" />
-            <p v-if="!noteValidator(note3).valid" class="error">
-                {{ noteValidator(note3).message }}
+            <input v-model.number="note3" type="number" placeholder="Nota 3" @blur="touched.note3 = true" />
+            <p v-if="(formSubmitted || touched.note3) && !errors.note3.valid" class="error">
+                {{ errors.note3.message }}
             </p>
         </div>
 
         <div>
-            <input v-model.number="asist" type="number" min="0" max="100" placeholder="Asistencia %" />
-            <p v-if="!asistValidator(asist)" class="error">
-                La asistencia debe estar entre 0 y 100%.
+            <input v-model.number="asist" type="number" placeholder="Asistencia %" @blur="touched.asist = true" />
+            <p v-if="(formSubmitted || touched.asist) && !errors.asist.valid" class="error">
+                {{ errors.asist.message }}
             </p>
         </div>
 
-        <button :disabled="!isFormValid" type="submit">
-            Calcular
-        </button>
+        <button type="submit">Calcular</button>
 
         <p v-if="resultValidation" class="error">
             {{ resultValidation }}
@@ -136,11 +147,6 @@ button {
     cursor: pointer;
     margin-top: 10px;
     transition: 0.2s;
-}
-
-button:disabled {
-    background: #9ca3af;
-    cursor: not-allowed;
 }
 
 button:hover {
