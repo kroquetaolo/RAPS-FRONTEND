@@ -62,8 +62,6 @@ function validate() {
     validateEmail();
     validatePassword();
     validateConfirmPassword();
-
-    // Verificamos si hay algún error activo
     const hasErrors = Object.values(errors.value).some(error => error !== "");
 
     if (hasErrors) return;
